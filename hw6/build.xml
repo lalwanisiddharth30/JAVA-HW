@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="report" name="hw6" xmlns:jacoco="antlib:org.jacoco.ant">
+	<property environment="env" />
+	<property name="junit.output.dir" value="junit" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.8" />
+	<property name="source" value="1.8" />
+	<property name="jacoco.home" value="${env.JACOCO_HOME}" />
+	<property name="report.dir" location="${basedir}/test/jacoco" />
+	<property name="result.exec.file" location="${report.dir}/jacoco.exec" />
+	<property name="result.report.dir" value="${report.dir}" />
+
+	<path id="JUnit 4.libraryclasspath">
+    	<pathelement location="${env.ANT_HOME}/lib/junit.jar"/>
+    	<pathelement location="${env.ANT_HOME}/lib/hamcrest-core.jar"/>
+	</path>
+	<path id="hw6.classpath">
+		<pathelement location="bin" />
+		<path refid="JUnit 4.libraryclasspath" />
+	</path>
+	<target name="init">
+		<mkdir dir="bin" />
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="src">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="test">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="clean">
+		<delete dir="bin" />
+		<delete dir="${report.dir}" />
+	</target>
+	<target depends="clean" name="cleanall" />
+	<target depends="build-subprojects,build-project" name="build" />
+	<target name="build-subprojects" />
+	<target depends="init" name="build-project">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+			<src path="src" />
+			<src path="test" />
+			<classpath refid="hw6.classpath" />
+		</javac>
+	</target>
+	<target name="Account">
+		<jacoco:coverage destfile="${result.exec.file}">
+			<java classname="edu.umb.cs.cs680.Account" failonerror="true" fork="yes">
+				<classpath refid="hw6.classpath" />
+			</java>
+		</jacoco:coverage>
+	</target>
+	<target name="CheckingAccount">
+		<jacoco:coverage destfile="${result.exec.file}">
+			<java classname="edu.umb.cs.cs680.CheckingAccount" failonerror="true" fork="yes">
+				<classpath refid="hw6.classpath" />
+			</java>
+		</jacoco:coverage>
+	</target>
+	<target name="SavingsAccount">
+		<jacoco:coverage destfile="${result.exec.file}">
+			<java classname="edu.umb.cs.cs680.SavingsAccount" failonerror="true" fork="yes">
+				<classpath refid="hw6.classpath" />
+			</java>
+		</jacoco:coverage>
+	</target>
+	<target name="test" depends="SavingsAccount">
+		<jacoco:coverage destfile="${result.exec.file}">
+			<junit fork="yes" printsummary="withOutAndErr">
+				<classpath refid="hw6.classpath" />
+				<batchtest>
+					<fileset dir="test">
+						<include name="**/*Test*" />
+					</fileset>
+				</batchtest>
+			</junit>
+		</jacoco:coverage>
+	</target>
+	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+		<classpath path="${jacoco.home}/lib/jacocoant.jar" />
+	</taskdef>
+	<target name="report" depends="clean, build, test">
+		<jacoco:report>
+			<executiondata>
+				<file file="${result.exec.file}" />
+			</executiondata>
+			<!--  to produce report  -->
+
+			<html destdir="${result.report.dir}" />
+			<structure name="HW6">
+				<classfiles>
+					<fileset dir="bin" />
+				</classfiles>
+			</structure>
+		</jacoco:report>
+	</target>
+</project>

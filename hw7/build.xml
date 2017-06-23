@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="findbugs" name="hw7" xmlns:jacoco="antlib:org.jacoco.ant">
+	<property environment="env" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.8" />
+	<property name="source" value="1.8" />
+
+	<property name="home.findbugs" value="${env.FINDBUGS_HOME}" />
+	<property name="jacoco.home" value="${env.JACOCO_HOME}" />
+
+	<property name="report.dir" location="${basedir}/test" />
+	<property name="result.exec.file" location="${report.dir}/jacoco/jacoco.exec" />
+	<property name="result.report.dir" value="${report.dir}/jacoco" />
+	<property name="result.findbugs" value="${report.dir}/findbugs" />
+
+	<path id="JUnit 4.libraryclasspath">
+		<pathelement location="${env.ANT_HOME}/lib/junit.jar" />
+		<pathelement location="${env.ANT_HOME}/lib/hamcrest-core.jar" />
+	</path>
+	<path id="hw7.classpath">
+		<pathelement location="bin" />
+		<path refid="JUnit 4.libraryclasspath" />
+	</path>
+	<target name="init">
+		<mkdir dir="bin" />
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="src">
+				<exclude name="**/*.ucls" />
+				<exclude name="**/*.useq" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="test">
+				<exclude name="**/*.ucls" />
+				<exclude name="**/*.useq" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="clean">
+		<delete dir="bin" />
+		<delete dir="${result.report.dir}" />
+		<delete dir="${result.findbugs}" />
+	</target>
+	<target depends="clean" name="cleanall" />
+	<target depends="build-project" name="build" />
+	<target depends="init" name="build-project">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+			<src path="src" />
+			<src path="test" />
+			<classpath refid="hw7.classpath" />
+		</javac>
+	</target>
+	<target name="test" depends="clean">
+		<jacoco:coverage destfile="${result.exec.file}">
+			<junit fork="yes" printsummary="withOutAndErr">
+				<classpath refid="hw7.classpath" />
+				<batchtest>
+					<fileset dir="test">
+						<include name="**/*Test*" />
+					</fileset>
+				</batchtest>
+			</junit>
+		</jacoco:coverage>
+	</target>
+	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+		<classpath path="${jacoco.home}/lib/jacocoant.jar" />
+	</taskdef>
+	<target name="jacoco" depends="clean, build, test">
+		<jacoco:report>
+			<executiondata>
+				<file file="${result.exec.file}" />
+			</executiondata>
+			<!--  to produce report  -->
+
+			<html destdir="${result.report.dir}" />
+			<structure name="hw7">
+				<classfiles>
+					<fileset dir="bin" />
+				</classfiles>
+			</structure>
+		</jacoco:report>
+	</target>
+	<target name="findbugs" depends="jacoco">
+
+		<!-- Fail this target if FindBugs is not installed. -->
+		<available file="${home.findbugs}/lib/findbugs.jar" property="findbugs.available" />
+		<fail unless="findbugs.available" message="Error: FINDBUGS_HOME not set or findbugs.jar not found." />
+		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpath="${home.findbugs}/lib/findbugs-ant.jar" />
+		<!-- Run FindBugs -->
+		<mkdir dir="${result.findbugs}" />
+		<findbugs home="${home.findbugs}" workHard="true" output="html" outputFile="${result.findbugs}/findbugs.html">
+			<class location="${basedir}/bin" />
+
+			<!-- Use the Proper Classpath -->
+			<auxclasspath refid="hw7.classpath" />
+		</findbugs>
+	</target>
+</project>
